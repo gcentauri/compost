@@ -15,5 +15,13 @@
                         (gensym string)
                         (get-universal-time)))))
 
+(defun split-string (delimiter string)
+  (labels ((rec (acc start)
+             (if-let (found (search delimiter string :start2 start))
+               (rec (cons (subseq string start found) acc)
+                    (+ found (length delimiter)))
+               (reverse (cons (subseq string start) acc)))))
+    (rec nil 0)))
+
 
 

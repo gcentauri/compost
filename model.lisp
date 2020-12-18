@@ -123,3 +123,23 @@
           (:text 'identity)
           (:md   'markdown:parse))))
 
+(defun make-user (username password)
+  (when (user-by-name (string-downcase username))
+    (error "A user already exists named ~a" username))
+  (make-instance 'user
+                 :name (string-downcase username)
+                 :pw (pw-digest password)))
+
+(defun make-session (user)
+  (make-instance 'session
+                 :user user
+                 :cookie (make-uid (user-name user))))
+
+(defun cookie-header-value (session)
+  (format nil "~a=~a" +session-cookie-key+ (session-cookie session)))
+
+(defun login-user (username password)
+  "Looks up a PLAYER by username and password."
+  (when-let (user (user-by-name (string-downcase username)))
+    (when (equal (pw-digest password) (pw-hash user))
+      user)))
