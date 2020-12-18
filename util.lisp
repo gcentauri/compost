@@ -25,3 +25,19 @@
 
 
 
+(let ((timezone-names nil))
+  (defun timezone-names ()
+    (if timezone-names timezone-names
+        (setf timezone-names
+              (sort  (loop :for k :being :the :hash-keys :of local-time::*location-name->timezone* 
+                           :collect k)
+                     #'string<)))))
+
+(defun timestring (universal-time zone)
+  "Given a UNIVERSAL-TIME and a string naming a timezone, return a
+  nice looking string  representing the time."
+  (local-time:format-timestring
+   nil
+   (local-time:universal-to-timestamp universal-time)
+   :format '(:long-weekday ", " :long-month " " :day " at " :hour ":" :min)
+   :timezone (local-time:find-timezone-by-location-name zone)))

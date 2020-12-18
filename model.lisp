@@ -43,8 +43,12 @@
    (pw-hash
     :accessor pw-hash
     :initarg :pw
-    :initform (error "USERs must have a password")))
+    :initform (error "USERs must have a password"))
+   (timezone
+    :accessor user-timezone
+    :initform "US/Central"))
   (:metaclass db:persistent-class ))
+
 
 (defclass session (db:store-object)
   ((user
@@ -68,8 +72,7 @@
    (render-style
     :accessor post-render-style
     :initarg :render-style
-    :initform 'identity
-    :documentation "Name of a function used to render text for display")
+    :initform :markdown)
    (user
     :reader post-user
     :initarg :user
@@ -119,9 +122,7 @@
 (defun set-post-style (post style)
   "STYLE is one of :TEXT or :MD"
   (setf (post-render-style post)
-        (ecase style
-          (:text 'identity)
-          (:md   'markdown:parse))))
+        ))
 
 (defun make-user (username password)
   (when (user-by-name (string-downcase username))
@@ -136,10 +137,35 @@
                  :cookie (make-uid (user-name user))))
 
 (defun cookie-header-value (session)
-  (format nil "~a=~a" +session-cookie-key+ (session-cookie session)))
+  (format nil "~a=~a" +session-cookie-key+
+          (session-cookie session)))
 
 (defun login-user (username password)
   "Looks up a PLAYER by username and password."
   (when-let (user (user-by-name (string-downcase username)))
     (when (equal (pw-digest password) (pw-hash user))
       user)))
+
+(defun render-post (post)
+  (with-slots (text render-style) post
+    (let ((renderer
+            (case render-style
+              ((:md :markdown)  'markdown:parse)
+              (t 'identity))))
+      (format spinneret:*html*  (funcall renderer text)))))
+
+
+(defgeneric path-to (object)
+  (:documentation "Returns a url path to the object"))
+
+(defmethod path-to ((topic topic))
+  (format nil "/topic/view/~a" (topic-name topic)))
+
+(defmethod path-to ((attachment attachment))
+  (format nil "/file/~a/~a"
+          (db:store-object-id attachment)
+          (attachment-filename attachment)))
+
+(defmethod path-to ((post title-post))
+  (format nil "/post/view/~a"
+          (db:store-object-id post)))

@@ -46,5 +46,33 @@
     (http-redirect "/login")))
 
 (defroute-auth :get "/"
-  (http-ok "text/html" (page/frontpage *user*)))
+  (http-ok "text/html" (page/frontpage)))
 
+(defroute-auth :get "/topic/view/:name"
+  (if-let (topic (topic-by-name name))
+    (http-ok "text/html" (page/topic topic))
+    (http-err 404 "Not Found")))
+
+(defroute-auth :post "/topic/add"
+  (when-let (ok (not (topic-by-name (getf *body* :name))))
+    (db:with-transaction ()
+      (make-instance 'topic :name (getf *body* :name))))
+  (http-redirect "/"))
+
+(defroute-auth :post "/topic/new-post/:topic-id"
+  (if-let (topic (db:store-object-with-id (parse-integer topic-id)))
+    (let ((post 
+            (db:with-transaction ()
+              (make-instance 'title-post
+                             :title (getf *body* :title)
+                             :user *user*
+                             :render-style :markdown
+                             :topic topic
+                             :text (getf *body* :text )))))
+      (http-redirect (path-to post)))
+    (http-err 404 "Topic not found")))
+
+(defroute-auth :get "/post/view/:postid"
+  (if-let (post (db:store-object-with-id (parse-integer postid)))
+    (http-ok "text/html" (page/post post))
+    (http-err 404 "Not Found")))
