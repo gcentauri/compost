@@ -34,6 +34,9 @@
        (progn ,@body)
        (http-redirect "/login"))))
 
+(defroute :get "/css/main.css"
+  (http-ok "text/css" (main-css)))
+
 (defroute :get "/login"
   (http-ok "text/html" (page/login)))
 
@@ -59,6 +62,11 @@
       (make-instance 'topic :name (getf *body* :name))))
   (http-redirect "/"))
 
+(defroute-auth :get "/topic/new-post/:topic-id"
+  (if-let (topic (db:store-object-with-id (parse-integer topic-id)))
+    (http-ok "text/html" (page/new-post topic))
+    (http-err 404 "Not Found")))
+
 (defroute-auth :post "/topic/new-post/:topic-id"
   (if-let (topic (db:store-object-with-id (parse-integer topic-id)))
     (let ((post 
@@ -68,7 +76,7 @@
                              :user *user*
                              :render-style :markdown
                              :topic topic
-                             :text (getf *body* :text )))))
+                             :text (clean-crlf  (getf *body* :text ))))))
       (http-redirect (path-to post)))
     (http-err 404 "Topic not found")))
 

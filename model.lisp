@@ -2,7 +2,6 @@
  
 (in-package #:compost)
 
-
 ;;; INITIALIZATION
 
 (defparameter +data-store-directory-name+
@@ -15,10 +14,11 @@
 
 (defun initialize-datastore ()
   (ensure-directories-exist (data-store-path))
-  (make-instance 'db:mp-store
-                 :directory (data-store-path)
-                 :subsystems (list (make-instance 'db:store-object-subsystem)
-                                   (make-instance 'db:blob-subsystem))))
+  (make-instance
+   'db:mp-store
+   :directory (data-store-path)
+   :subsystems (list (make-instance 'db:store-object-subsystem)
+                     (make-instance 'db:blob-subsystem))))
 
 ;;; CLASSES
 
@@ -104,7 +104,13 @@
     :initarg :topic
     :initform nil
     :index-type bknr.indices:hash-index
-    :index-reader title-posts-by-topic))
+    :index-reader posts-by-topic)
+   (status
+    :accessor post-status
+    :initarg :status
+    :initform :posted
+    :index-type bknr.indices:hash-index
+    :index-reader posts-by-status))
   (:metaclass db:persistent-class))
 
 (defclass reply-post (post)
@@ -118,11 +124,6 @@
 
 
 ;;; MODEL FUNCTIONS
-
-(defun set-post-style (post style)
-  "STYLE is one of :TEXT or :MD"
-  (setf (post-render-style post)
-        ))
 
 (defun make-user (username password)
   (when (user-by-name (string-downcase username))
@@ -147,13 +148,14 @@
       user)))
 
 (defun render-post (post)
+  "Renders the text of POST to SPINNERET:*HTML* and returns no values"
   (with-slots (text render-style) post
     (let ((renderer
             (case render-style
               ((:md :markdown)  'markdown:parse)
               (t 'identity))))
-      (format spinneret:*html*  (funcall renderer text)))))
-
+      (princ (funcall renderer text) spinneret:*html*  )
+      (values))))
 
 (defgeneric path-to (object)
   (:documentation "Returns a url path to the object"))
@@ -169,3 +171,4 @@
 (defmethod path-to ((post title-post))
   (format nil "/post/view/~a"
           (db:store-object-id post)))
+

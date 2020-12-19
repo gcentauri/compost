@@ -23,7 +23,11 @@
                (reverse (cons (subseq string start) acc)))))
     (rec nil 0)))
 
-
+(defun join-strings (sep strings)
+  (with-output-to-string (out)
+    (loop :for (str . more) :on strings
+          :do (princ str out)
+          :when more :do (princ sep out))))
 
 (let ((timezone-names nil))
   (defun timezone-names ()
@@ -41,3 +45,7 @@
    (local-time:universal-to-timestamp universal-time)
    :format '(:long-weekday ", " :long-month " " :day " at " :hour ":" :min)
    :timezone (local-time:find-timezone-by-location-name zone)))
+
+(defun remove-carriage-return (string)
+  "removes #\Return from strings"
+  (remove #\return string< ))
