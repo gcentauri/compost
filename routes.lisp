@@ -119,3 +119,25 @@
              (alexandria:read-file-into-byte-vector
               (db:blob-pathname blob)))
     (http-err 404 "Not Found")))
+
+(defroute-auth :get "/user/profile"
+  (http-ok "text/html" (page/profile)))
+
+(defroute-auth :post "/user/name"
+  (db:with-transaction ()
+    (setf (user-name *user*)            ; uniqueness should be covered by db
+          (getf *body* :name)))
+  (http-redirect "/user/profile"))
+
+
+(defroute-auth :post "/user/password"
+  (if (and
+       (equal (pw-hash *user*)
+              (pw-digest (getf *body* :old-password)))
+       (equal (getf *body* :new-password)
+              (getf *body* :repeat-password)))
+      (progn
+        (db:with-transaction ()
+          (setf (pw-hash *user*)
+                (pw-digest (getf *body* :new-password))))
+        (http-redirect "/user/profile"))))

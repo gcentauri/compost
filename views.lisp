@@ -90,7 +90,6 @@
      
      (pre
       :background-color #(darkest)
-      
       :color #(secondary-color))
 
       (.time
@@ -98,15 +97,22 @@
 
       (.username
        :color #(primary-color))
+
+      (.nav
+       :padding 5px
+
+       (span
+       (a :display inline) ))
+      
+      (.right
+       :float right)
+
       
      (.comment
       :border 1px solid #(medium)
       :border-radius 5px
       :color #(light)
 
-      (.right
-       :float right
-       :text-align right)
       
       (h1
        :font-size 1.3em)
@@ -211,13 +217,15 @@
 
 
 (defview nav (&rest breadcrumbs)
+  (:a :class "right"
+      :href "/user/profile"
+      "Profile")
   (:nav
    :class "nav"
-   (:a :href "/profile" "Profile")
-   " "
    (:a :href "/" "Frontpage")
    (loop :for (path text) :in breadcrumbs
-         :do (:span "→" (:a :href path text)))))
+         :do (:span "→" (:a :href path text)))
+   ))
 
 (defpage new-post (topic) ()
   (view/nav)
@@ -450,3 +458,29 @@
                (user-name (post-user post))))
        (:p ))))
    ))
+
+(defpage profile () ()
+    (with-slots (name ) *user*
+      (view/nav)
+      (:form
+       :method "POST"
+       :action "/user/name"
+       (:input :placeholder "Change Username"
+               :value name
+               :name "name")
+       (:button :type "submit" :class "button" "Update Name"))
+      
+      (:form
+       :method "POST"
+       :action "/user/password"
+       (:input :placeholder "Current Password"  :type "password"
+               :name "old-password")
+       (:input :placeholder "New Password" :type "password"
+               :name "new-password")
+       (:input :placeholder "Repeat New Password" :type "password"
+               :name "repeat-password")
+       (:button :type "submit" :class "button" "Change Password"))
+
+      
+
+      ))
