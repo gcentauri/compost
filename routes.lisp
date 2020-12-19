@@ -67,16 +67,32 @@
     (http-ok "text/html" (page/new-post topic))
     (http-err 404 "Not Found")))
 
+(defun multipart-field-values (&rest keys)
+  (loop :for field :in *body*
+        :when (member (getf field :name) keys :test #'string-equal)
+          :collect (getf field :body)))
+
+(defun multipart-files ()
+  (remove-if-not (lambda (ls) (getf ls :filename)) *body*))
+
 (defroute-auth :post "/topic/new-post/:topic-id"
   (if-let (topic (db:store-object-with-id (parse-integer topic-id)))
     (let ((post 
             (db:with-transaction ()
-              (make-instance 'title-post
-                             :title (getf *body* :title)
-                             :user *user*
-                             :render-style :markdown
-                             :topic topic
-                             :text (clean-crlf  (getf *body* :text ))))))
+              (let ((post 
+                      (destructuring-bind (title text) (multipart-field-values "title" "text")
+                        (make-instance 'title-post
+                                       :title title
+                                       :user *user*
+                                       :render-style :markdown
+                                       :topic topic
+                                       :text (remove-carriage-return text)))))
+                (dolist (file (multipart-files))
+                  (db:make-blob-from-file (getf file :body) 'attachment
+                                          :filename (getf file :filename)
+                                          :post post
+                                          :type (getf file :content-type)))
+                post))))
       (http-redirect (path-to post)))
     (http-err 404 "Topic not found")))
 
@@ -95,4 +111,11 @@
                        :render-style :markdown
                        :text (remove-carriage-return (getf *body* :text))))
       (http-redirect (format nil "/post/view/~a" top-post-id)))
+    (http-err 404 "Not Found")))
+
+(defroute-auth :get "/file/:blob-id/:filename"
+  (if-let (blob (db:store-object-with-id (parse-integer blob-id)))
+    (http-ok (db:blob-mime-type blob)
+             (alexandria:read-file-into-byte-vector
+              (db:blob-pathname blob)))
     (http-err 404 "Not Found")))

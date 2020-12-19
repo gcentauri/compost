@@ -169,9 +169,6 @@
    (loop :for (path text) :in breadcrumbs
          :do (:span "→" (:a :href path text)))))
 
-
-
-
 (defpage new-post (topic) ()
   (view/nav)
   (:div
@@ -181,10 +178,31 @@
    (:form
     :method "POST"
     :action (format nil "/topic/new-post/~a" (db:store-object-id topic)) 
+    :enctype "multipart/form-data"
     (:input :name "title" :placeholder "Post Title") (:br)
-    (:textarea :name "text" :rows "22" :cols "80" :wrap "soft")
-    (:br)
-    (:button :class "button" :type "submit" "Submit Post"))))
+    (:textarea :name "text" :rows "22" :cols "80" :wrap "soft")  (:br)
+    (:span :class "button" :id "attachment-button" "Attach File")
+    (:div :id "attachment-section")
+    (:button :class "button" :type "submit" "Submit Post")))
+
+  (:script
+   (ps:ps
+     (let ((attachment-count 0))
+
+       (defun make-attachment-form ()
+         (let ((input (ps:chain document (create-element "input"))))
+           (setf (ps:chain input type) "file"
+                 (ps:chain input name) (+  "file-"  (incf attachment-count)))
+           input))
+
+       (defun add-attachment ()
+         (ps:chain document
+                   (get-element-by-id "attachment-section")
+                   (append-child (make-attachment-form))))
+       
+       (ps:chain document
+                 (get-element-by-id "attachment-button")
+                 (add-event-listener "click" #'add-attachment))))))
 
 (defpage topic (topic) (:title (format nil "Compost - ~a"
                                        (topic-name topic)))
