@@ -172,6 +172,12 @@
   (format nil "/post/view/~a"
           (db:store-object-id post)))
 
+(defmethod path-to ((post reply-post))
+  (format nil
+          "~a#~a"
+          (path-to (find-root-post post))
+          (db:store-object-id post)))
+
 
 (defgeneric find-root-post (post)
   (:documentation "Navigages up the reply tree to the root post"))
@@ -184,3 +190,9 @@
   (sort (copy-seq (replies-to post))
         #'<
         :key #'post-created))
+
+(defun most-recent-posts (&key (count 10))
+  (subseq (sort (copy-seq (db:store-objects-with-class 'post))
+                #'>
+                :key (lambda (o) (db:store-object-last-change o 1)))
+          0 count))

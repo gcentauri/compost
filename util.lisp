@@ -50,6 +50,18 @@
      :format format-list
      :timezone (local-time:find-timezone-by-location-name zone))))
 
+(defun short-timestring (universal-time zone)  
+  (let ((format-list
+          (if (< 10 (nth-value 1 (decode-universal-time universal-time)))
+              '( :year "-" :month "-" :day " " :hour12 ":" :min :ampm)
+              '( :year "-" :month "-" :day " " :hour12 ":0" :min :ampm))))
+    (local-time:format-timestring
+     nil
+     (local-time:universal-to-timestamp universal-time)
+     :format format-list
+     :timezone (local-time:find-timezone-by-location-name zone))))
+
+
 (defun remove-carriage-return (string)
   "removes #\Return from strings"
   (remove #\return string< ))

@@ -55,7 +55,8 @@
 
      ((:or a p div h1 h2 h3 h4 pre input textarea ul)
       :line-height 1.4
-      :margin #(margin))
+      :margin #(margin)
+      )
      
      (a
       :text-decoration none
@@ -173,29 +174,30 @@
       :padding 10px
       :padding-left 4px)
 
+     (.timeline-list
+      :margin-left #(unmargin)
+      :list-style-type none
+      :font-size smaller
+
+      (li
+       :padding 4px 
+       :margin-left #(unmargin)
+       :border-top 1px solid #(medium))
+
+      (a
+       :margin-left #(unmargin))
+      )
+
      (.timeline-page-container
       :width 100%
       :display grid
       :grid-template-columns 1fr 5fr 2fr 1fr
-      ;; :scrollbar-width thin
-      ;; :scrollbar-color #(dark) #(medium-dark)
 
       (.main-content-panel
- ;      :width 75%
-;       :position fixed
-;       :top 0
-;       :left 0
-;       :height 100%
-;       :overflow scroll
+
        )
 
       (.timeline-panel
- ;      :position fixed
-;       :top 0
-;       :right 0
-;       :height 100%
-;       :width 20%
-;       :overflow scroll
        :background-color #(dark)))
      )))
 
@@ -422,5 +424,24 @@
   (:div
    :class "timeline-panel"
    (:h2 "Timeline")
+   (:ul
+    :class "timeline-list"
+    (dolist (post (most-recent-posts))
+      (:li
+       (:p 
+        (:a :href (path-to post)
+            (typecase post
+              (reply-post
+               (let ((root (find-root-post post))) 
+                 (:span "replying to .." (post-title root) " in " (topic-name (post-topic root)))))
+              (title-post
+               (:span "created " (post-title post) " in " (topic-name (post-topic post))))))
 
+        (:br)
+        (:span :class "time"
+               (short-timestring (post-created post) (user-timezone *user*)))
+        " --  "
+        (:span :class "username"
+               (user-name (post-user post))))
+       (:p ))))
    ))
