@@ -23,6 +23,15 @@
        (with-html
          ,@body))))
 
+(defmacro defpage-with-timeline (name lambda-list defpage-keywords &body body)
+  `(defpage ,name ,lambda-list ,defpage-keywords
+     (:div :class "timeline-page-container"
+           (:div )
+           (:div :class "main-content-panel"
+            ,@body)
+           (view/timeline)
+           (:div))))
+
 
 (defun main-css ()
   (lass:compile-and-write
@@ -34,19 +43,19 @@
            (medium-dark "#324150")
            (medium "#4D637A")
            (medium-light "#CCC")
-           (light "#EEE"))
+           (light "#EEE")
+           (margin 10px)
+           (unmargin -10px))
 
      (body
       :background-color #(medium-dark)
       :color #(light)
       :padding 0
-      :font-size 16px
-      )
+      :font-size 16px)
 
      ((:or a p div h1 h2 h3 h4 pre input textarea ul)
-      :max-width 680px
       :line-height 1.4
-      :margin 20px)
+      :margin #(margin))
      
      (a
       :text-decoration none
@@ -56,8 +65,8 @@
       :color #(tertiary-color))
 
      (.button
-      :margin-left 20px
-      :margin-right 20px
+      :margin-left #(margin)
+      :margin-right #(margin)
       :margin-top 2px
       :margin-bottom 2px
       :background-color #(medium-dark)
@@ -126,7 +135,7 @@
       (ul
        :display flex
        :list-style-type none
-       :margin-left -20px))
+       :margin-left #(unmargin)))
      
      (.topic-listing
       :width 100%
@@ -136,17 +145,17 @@
       :grid-row-gap 1px
       (div
        :margin 0px
-       :padding 10px
+       :padding 6px
        :padding-left 0px
        :background-color #(dark)))
      
      (.post-listing
       :list-style-type none
-      :margin-left -20px
+      :margin-left #(unmargin)
       (li
        :border-top 1px solid #(medium)
        :background-color #(dark)
-       :padding 10px
+       :padding 6px
 
        (p
         :padding 0
@@ -154,7 +163,7 @@
        
        (h4
         :margin 0
-        :margin-left -20px
+        :margin-left #(unmargin)
         :padding 0)
        ))
 
@@ -163,7 +172,31 @@
       :border-radius 5px
       :padding 10px
       :padding-left 4px)
-     
+
+     (.timeline-page-container
+      :width 100%
+      :display grid
+      :grid-template-columns 1fr 5fr 2fr 1fr
+      ;; :scrollbar-width thin
+      ;; :scrollbar-color #(dark) #(medium-dark)
+
+      (.main-content-panel
+ ;      :width 75%
+;       :position fixed
+;       :top 0
+;       :left 0
+;       :height 100%
+;       :overflow scroll
+       )
+
+      (.timeline-panel
+ ;      :position fixed
+;       :top 0
+;       :right 0
+;       :height 100%
+;       :width 20%
+;       :overflow scroll
+       :background-color #(dark)))
      )))
 
 
@@ -217,8 +250,8 @@
                  (get-element-by-id "attachment-button")
                  (add-event-listener "click" #'add-attachment))))))
 
-(defpage topic (topic) (:title (format nil "Compost - ~a"
-                                       (topic-name topic)))
+(defpage-with-timeline topic (topic) (:title (format nil "Compost - ~a"
+                                                     (topic-name topic)))
   (view/nav (list (path-to topic) (topic-name topic) ))
   (:h1 (topic-name topic))
   (:a :href (format nil "/topic/new-post/~a" (db:store-object-id topic))
@@ -262,7 +295,7 @@
     :type "submit"
     "Add")))
 
-(defpage frontpage () (:title "Compost")
+(defpage-with-timeline frontpage () (:title "Compost")
   (view/nav)
   (:h1 "Hey " (user-name *user*))
   (view/add-topic)
@@ -317,7 +350,7 @@
        (:a :href url (attachment-filename attachment))))))
 
 
-(defpage post (post) (:title (format nil "Compost - ~a"
+(defpage-with-timeline post (post) (:title (format nil "Compost - ~a"
                                      (post-title post)))
   (view/nav (list (path-to (post-topic post))
                   (topic-name (post-topic post)))
@@ -385,3 +418,9 @@
    (dolist (reply (sorted-replies-to comment-post))
      (view/comment reply ))))
 
+(defview timeline ()
+  (:div
+   :class "timeline-panel"
+   (:h2 "Timeline")
+
+   ))
