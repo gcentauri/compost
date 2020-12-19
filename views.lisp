@@ -29,6 +29,7 @@
    '(:let ((primary-color "#EAA864")
            (secondary-color "#8DC85F")
            (tertiary-color "#208B8A")
+           (darkest "#1a1a1a")
            (dark "#25303B")
            (medium-dark "#324150")
            (medium "#4D637A")
@@ -42,8 +43,7 @@
       :font-size 16px
       )
 
-     ((:or a p div h1 h2 h3 h4 pre input textarea)
-
+     ((:or a p div h1 h2 h3 h4 pre input textarea ul)
       :max-width 650px
       :line-height 1.4
       :margin 20px)
@@ -77,10 +77,9 @@
       :color #(light)
       :padding 4px
       :border-radius 4px)
-
      
      (pre
-      :background-color #(dark)
+      :background-color #(darkest)
       
       :color #(secondary-color))
 
@@ -134,6 +133,12 @@
         :margin-left -20px
         :padding 0)
        ))
+
+     (.postbody
+      :background-color #(dark)
+      :border-radius 5px
+      :padding 10px
+      :padding-left 4px)
      
      )))
 
@@ -223,23 +228,24 @@
 (defpage post (post) (:title (format nil "Compost - ~a"
                                      (post-title post)))
   (view/nav (list (path-to (post-topic post))
-                  (topic-name (post-topic post))))
+                  (topic-name (post-topic post)))
+            (list (path-to post)
+                  (post-title post)))
+  
+
   (:div
-   :class "post listing"
-   (:a :href (path-to post) (:h1 (post-title post)))
+   :class "postbody"
+   (render-post post)
+   (view/attachments post))
+  (:div
    (:span :class "time"
           (timestring (post-created post)
                       (user-timezone *user*)))
    " -- "
    (:span :class "username"
           (user-name (post-user post))))
-
-  (:div
-   :class "postbody post"
-   (render-post post)
-   (view/attachments post))
   (view/reply-form post)
-   (:h4 "comments")
+  (:h4 "comments")
   (dolist (reply (sorted-replies-to post))
     (view/comment reply)))
 
