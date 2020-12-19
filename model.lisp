@@ -192,7 +192,7 @@
         :key #'post-created))
 
 (defun most-recent-posts (&key (count 10))
-  (subseq (sort (copy-seq (db:store-objects-with-class 'post))
+  (let ((posts (sort (copy-seq (db:store-objects-with-class 'post))
                 #'>
-                :key (lambda (o) (db:store-object-last-change o 1)))
-          0 count))
+                :key (lambda (o) (db:store-object-last-change o 1)))))
+    (subseq posts  0 (min count (length posts)))))

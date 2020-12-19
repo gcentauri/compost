@@ -64,4 +64,4 @@
 
 (defun remove-carriage-return (string)
   "removes #\Return from strings"
-  (remove #\return string< ))
+  (remove #\return string ))
