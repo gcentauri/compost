@@ -115,6 +115,19 @@
       :height 0
       :widht 0)
 
+
+     (.attachment
+      :padding 2px
+      ((:or img video audio)
+       :max-width 200px
+       :max-height 200px))
+
+     (.attachments-list
+      (ul
+       :display flex
+       :list-style-type none
+       :margin-left -20px))
+     
      (.topic-listing
       :width 100%
       :display grid
@@ -259,10 +272,49 @@
           (view/topic topic))))
 
 (defview attachments (post)
-  (:div
-    :class "attachments"
-    (dolist (attachment (post-attachments post))
-      (:a :href (path-to attachment) (attachment-filename attachment)))))
+  (when-let (attachments (post-attachments post))
+    (:div
+     :class "attachments-list"
+     (:h4 "Attachemnts:")
+     (:ul 
+      (dolist (attachment (post-attachments post))
+        (:li  :class "attachment" (view/file attachment)))))))
+
+(defun image-blob-p (blob)
+  (member (db:blob-mime-type blob)
+          '("image/png" "image/jpg" "image/svg"
+            "image/jpg" "image/jpeg" "image/bmp"
+            "image/gif")
+          :test #'string-equal))
+
+(defun video-blob-p (blob)
+  (member (db:blob-mime-type blob)
+          '("video/webm" "video/mp4" "video/ogg")
+          :test #'string-equal))
+
+(defun audio-blob-p (blob)
+  (member (db:blob-mime-type blob)
+          '("audio/wav" "audio/webm" "audio/ogg" "audio/mp3")
+          :test #'string-equal))
+
+
+(defview file (attachment)
+  (let ((url (path-to attachment)))
+    (cond
+      ((image-blob-p attachment)
+       (:img :src url))
+      ((video-blob-p attachment)
+       (:video
+        :controls "true"
+        (:source :src url 
+                 :type (db:blob-mime-type attachment))))
+      ((audio-blob-p attachment)
+       (:audio
+        :controls "true"
+        (:source :src url )))
+
+      (t
+       (:a :href url (attachment-filename attachment))))))
 
 
 (defpage post (post) (:title (format nil "Compost - ~a"
