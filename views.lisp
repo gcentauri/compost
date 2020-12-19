@@ -44,7 +44,7 @@
       )
 
      ((:or a p div h1 h2 h3 h4 pre input textarea ul)
-      :max-width 650px
+      :max-width 680px
       :line-height 1.4
       :margin 20px)
      
@@ -97,8 +97,6 @@
       (.right
        :float right
        :text-align right)
-
-      
       
       (h1
        :font-size 1.3em)
@@ -117,8 +115,21 @@
       :height 0
       :widht 0)
 
+     (.topic-listing
+      :width 100%
+      :display grid
+      :grid-template-columns 1fr 1fr
+      :grid-column-gap 1px
+      :grid-row-gap 1px
+      (div
+       :margin 0px
+       :padding 10px
+       :padding-left 0px
+       :background-color #(dark)))
+     
      (.post-listing
       :list-style-type none
+      :margin-left -20px
       (li
        :border-top 1px solid #(medium)
        :background-color #(dark)
@@ -162,12 +173,18 @@
 
 
 (defpage new-post (topic) ()
-  (:form
-   :method "POST"
-   :action (format nil "/topic/new-post/~a" (db:store-object-id topic)) 
-   (:input :name "title" :placeholder "Post Title")
-   (:textarea :name "text" :rows "12" :cols "60" :wrap "soft")
-   (:button :class "button" :type "submit" "Submit Post")))
+  (view/nav)
+  (:div
+   :class "new-post"
+   (:h2 "New Post")
+   (:p "Presently, the body of the post is in markdown")
+   (:form
+    :method "POST"
+    :action (format nil "/topic/new-post/~a" (db:store-object-id topic)) 
+    (:input :name "title" :placeholder "Post Title") (:br)
+    (:textarea :name "text" :rows "22" :cols "80" :wrap "soft")
+    (:br)
+    (:button :class "button" :type "submit" "Submit Post"))))
 
 (defpage topic (topic) (:title (format nil "Compost - ~a"
                                        (topic-name topic)))
@@ -196,8 +213,12 @@
 
 (defview topic (topic)
   (:div
-   :class "topic listing"
-   (:a :href (path-to topic) (topic-name topic))))
+   (:a :href (path-to topic)
+       (topic-name topic))
+   (:span
+    :class "right"
+    (format nil "~a" (length (posts-by-topic topic)))
+    " posts")))
 
 
 (defview add-topic ()
@@ -215,8 +236,9 @@
   (:h1 "Hey " (user-name *user*))
   (view/add-topic)
   (:h2 "Sections")
-  (dolist (topic (all-topics))
-    (view/topic topic)))
+  (:div :class "topic-listing"
+        (dolist (topic (all-topics))
+          (view/topic topic))))
 
 (defview attachments (post)
   (:div
