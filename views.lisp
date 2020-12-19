@@ -213,6 +213,8 @@
 (defview nav (&rest breadcrumbs)
   (:nav
    :class "nav"
+   (:a :href "/profile" "Profile")
+   " "
    (:a :href "/" "Frontpage")
    (loop :for (path text) :in breadcrumbs
          :do (:span "→" (:a :href path text)))))
@@ -299,9 +301,9 @@
 
 (defpage-with-timeline frontpage () (:title "Compost")
   (view/nav)
-  (:h1 "Hey " (user-name *user*))
-  (view/add-topic)
+
   (:h2 "Sections")
+    (view/add-topic)
   (:div :class "topic-listing"
         (dolist (topic (all-topics))
           (view/topic topic))))
@@ -402,9 +404,12 @@
            (ps:chain event target class-list (add "hidden")))))))))
 
 (defview comment (comment-post)
+
   (:div
    :class "comment"
+   :id (format nil "comment-~a" (db:store-object-id comment-post))
    (:p 
+
     (:span :class "time"
            (timestring (post-created comment-post)
                        (user-timezone *user*)))

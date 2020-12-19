@@ -174,7 +174,7 @@
 
 (defmethod path-to ((post reply-post))
   (format nil
-          "~a#~a"
+          "~a#comment-~a"
           (path-to (find-root-post post))
           (db:store-object-id post)))
 
