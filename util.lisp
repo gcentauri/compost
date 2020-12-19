@@ -40,11 +40,15 @@
 (defun timestring (universal-time zone)
   "Given a UNIVERSAL-TIME and a string naming a timezone, return a
   nice looking string  representing the time."
-  (local-time:format-timestring
-   nil
-   (local-time:universal-to-timestamp universal-time)
-   :format '(:long-weekday ", " :long-month " " :day " at " :hour ":" :min)
-   :timezone (local-time:find-timezone-by-location-name zone)))
+  (let ((format-list
+          (if (< 10 (nth-value 1 (decode-universal-time universal-time)))
+              '(:long-weekday ", " :long-month " " :day " at " :hour12 ":" :min :ampm)
+              '(:long-weekday ", " :long-month " " :day " at " :hour12 ":0" :min :ampm))))
+    (local-time:format-timestring
+     nil
+     (local-time:universal-to-timestamp universal-time)
+     :format format-list
+     :timezone (local-time:find-timezone-by-location-name zone))))
 
 (defun remove-carriage-return (string)
   "removes #\Return from strings"

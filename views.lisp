@@ -84,18 +84,23 @@
       
       :color #(secondary-color))
 
-     (.comment
-      :border 1px solid #(medium)
-      :border-radius 5px
-      :color #(light)
-
       (.time
        :color #(medium-light))
 
       (.username
        :color #(primary-color))
       
+     (.comment
+      :border 1px solid #(medium)
+      :border-radius 5px
+      :color #(light)
 
+      (.right
+       :float right
+       :text-align right)
+
+      
+      
       (h1
        :font-size 1.3em)
 
@@ -112,6 +117,24 @@
       :visibility hidden
       :height 0
       :widht 0)
+
+     (.post-listing
+      :list-style-type none
+      (li
+       :border-top 1px solid #(medium)
+       :background-color #(dark)
+       :padding 10px
+
+       (p
+        :padding 0
+        :margin 0)
+       
+       (h4
+        :margin 0
+        :margin-left -20px
+        :padding 0)
+       ))
+     
      )))
 
 
@@ -128,19 +151,9 @@
    :class "nav"
    (:a :href "/" "Frontpage")
    (loop :for (path text) :in breadcrumbs
-         :do (:a :href path text))))
+         :do (:span "→" (:a :href path text)))))
 
-(defview title-post (post)
-  (with-slots (title created user) post
-    (:div
-     :class "post listing"
-     (:a :href (path-to post) (:h3 title))
-     (:span :class "time"
-            (timestring (post-created post)
-                        (user-timezone *user*)))
-     (:span :class "username"
-            (user-name user))
-     )))
+
 
 
 (defpage new-post (topic) ()
@@ -153,13 +166,28 @@
 
 (defpage topic (topic) (:title (format nil "Compost - ~a"
                                        (topic-name topic)))
-  (view/nav)
+  (view/nav (list (path-to topic) (topic-name topic) ))
   (:h1 (topic-name topic))
   (:a :href (format nil "/topic/new-post/~a" (db:store-object-id topic))
       :class "button"
       "New Post")
-  (dolist (post (posts-by-topic topic))
-    (view/title-post post)))
+  (:ul
+   :class "post-listing"
+   (dolist (post (posts-by-topic topic))
+     (view/title-post post))))
+
+(defview title-post (post)
+  (with-slots (title created user) post
+    (:li 
+     (:h4  (:a :href (path-to post) title))
+     (:br)
+     (:p 
+      (:span :class "time"
+             (timestring (post-created post)
+                         (user-timezone *user*)))
+      " -- "
+      (:span :class "username"
+             (user-name user))))))
 
 (defview topic (topic)
   (:div
@@ -196,7 +224,16 @@
                                      (post-title post)))
   (view/nav (list (path-to (post-topic post))
                   (topic-name (post-topic post))))
-  (view/title-post post)
+  (:div
+   :class "post listing"
+   (:a :href (path-to post) (:h1 (post-title post)))
+   (:span :class "time"
+          (timestring (post-created post)
+                      (user-timezone *user*)))
+   " -- "
+   (:span :class "username"
+          (user-name (post-user post))))
+
   (:div
    :class "postbody post"
    (render-post post)
