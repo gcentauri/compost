@@ -172,3 +172,15 @@
   (format nil "/post/view/~a"
           (db:store-object-id post)))
 
+
+(defgeneric find-root-post (post)
+  (:documentation "Navigages up the reply tree to the root post"))
+
+(defmethod find-root-post ((post title-post)) post)
+(defmethod find-root-post ((post reply-post))
+  (find-root-post (reply-to post)))
+
+(defmethod sorted-replies-to (post)
+  (sort (copy-seq (replies-to post))
+        #'<
+        :key #'post-created))

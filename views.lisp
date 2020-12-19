@@ -32,8 +32,8 @@
            (dark "#25303B")
            (medium-dark "#324150")
            (medium "#4D637A")
-           (medium-light "#5E7A96")
-           (light "#DDD"))
+           (medium-light "#CCC")
+           (light "#EEE"))
 
      (body
       :background-color #(medium-dark)
@@ -42,7 +42,7 @@
       :font-size 16px
       )
 
-     ((:or a p div h1 h2 h3 h4 pre)
+     ((:or a p div h1 h2 h3 h4 pre input textarea)
 
       :max-width 650px
       :line-height 1.4
@@ -50,33 +50,68 @@
      
      (a
       :text-decoration none
-      :color #(primary-color))
+      :color #(secondary-color))
 
      ((:and a :hover)
       :color #(tertiary-color))
 
      (.button
+      :margin-left 20px
+      :margin-right 20px
+      :margin-top 2px
+      :margin-bottom 2px
       :background-color #(medium-dark)
-      :padding 8px
+      :padding 2px
       :border-radius 4px
+      :color #(secondary-color)
+      :border solid 1px #(secondary-color))
+
+     ((:and  .button :hover)
+      :background-color #(dark)
       :color #(tertiary-color)
       :border solid 1px #(tertiary-color))
 
-     ((:and  .button :hover)
-      :background-color #(dark))
-
-     (input
+     ((:or input textarea)
       :background-color #(medium)
       :border none
       :color #(light)
       :padding 4px
       :border-radius 4px)
 
+     
      (pre
       :background-color #(dark)
       
       :color #(secondary-color))
 
+     (.comment
+      :border 1px solid #(medium)
+      :border-radius 5px
+      :color #(light)
+
+      (.time
+       :color #(medium-light))
+
+      (.username
+       :color #(primary-color))
+      
+
+      (h1
+       :font-size 1.3em)
+
+      (h2
+       :font-size 1.2em)
+
+      (h3
+       :font-size 1.1em)
+
+      ((:or h4 h5 h6)
+       :font-size 1.0em))
+     
+     (.hidden
+      :visibility hidden
+      :height 0
+      :widht 0)
      )))
 
 
@@ -105,12 +140,7 @@
                         (user-timezone *user*)))
      (:span :class "username"
             (user-name user))
-     
-
-     (:div
-      :class "attachments"
-      (dolist (attachment (post-attachments post))
-        (:a :href (path-to attachment) (attachment-filename attachment)))))))
+     )))
 
 
 (defpage new-post (topic) ()
@@ -155,6 +185,13 @@
   (dolist (topic (all-topics))
     (view/topic topic)))
 
+(defview attachments (post)
+  (:div
+    :class "attachments"
+    (dolist (attachment (post-attachments post))
+      (:a :href (path-to attachment) (attachment-filename attachment)))))
+
+
 (defpage post (post) (:title (format nil "Compost - ~a"
                                      (post-title post)))
   (view/nav (list (path-to (post-topic post))
@@ -162,4 +199,54 @@
   (view/title-post post)
   (:div
    :class "postbody post"
-   (render-post post)))
+   (render-post post)
+   (view/attachments post))
+  (view/reply-form post)
+   (:h4 "comments")
+  (dolist (reply (sorted-replies-to post))
+    (view/comment reply)))
+
+(defview reply-form (post)
+  (let* ((post-id (db:store-object-id post))
+         (button-id (format nil "reply-reveal-~a" post-id)))
+    (:button :id button-id :class "button" "Reply")
+
+    (:form
+     :class "reply-form"
+     :class "hidden"
+     :method "POST"
+     :action (format nil  "/post/reply/~a" post-id)
+     (:textarea :name "text" :rows "12" :cols "60" :wrap "soft")
+     (:br)
+     (:button :type "submit" :class "button" "Reply"))
+
+    (:script
+     (ps:ps
+       (ps:chain
+        document
+        (get-element-by-id (ps:lisp button-id))
+        (add-event-listener 
+         "click"
+         (lambda (event)
+           (ps:chain event target next-element-sibling class-list (remove "hidden"))
+           (ps:chain event target class-list (add "hidden")))))))))
+
+(defview comment (comment-post)
+  (:div
+   :class "comment"
+   (:p 
+    (:span :class "time"
+           (timestring (post-created comment-post)
+                       (user-timezone *user*)))
+    " --  "
+    (:span :class "username"
+           (user-name (post-user comment-post)))
+    " says:")
+   (render-post comment-post)
+   (view/attachments comment-post)
+
+   (view/reply-form comment-post)
+
+   (dolist (reply (sorted-replies-to comment-post))
+     (view/comment reply ))))
+
