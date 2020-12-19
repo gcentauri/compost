@@ -1,9 +1,9 @@
 ;;;; compost.asd
 
 (asdf:defsystem #:compost
-  :description "Describe compost here"
-  :author "Your Name <your.name@example.com>"
-  :license  "Specify license here"
+  :description "A message board for small groups"
+  :author "Colin Okay <okay@toyful.space>"
+  :license  "AGPL-3.0"
   :version "0.0.1"
   :serial t
   :depends-on (#:bknr.datastore
