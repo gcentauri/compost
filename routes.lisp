@@ -104,13 +104,14 @@
 (defroute-auth :post "/post/reply/:postid"
   (if-let (post (db:store-object-with-id (parse-integer postid)))
     (let ((top-post-id (db:store-object-id (find-root-post post))))
-      (db:with-transaction ()
-        (make-instance 'reply-post
-                       :predecessor post
-                       :user *user*
-                       :render-style :markdown
-                       :text (remove-carriage-return (getf *body* :text))))
-      (http-redirect (format nil "/post/view/~a" top-post-id)))
+      (let ((new-post
+              (db:with-transaction ()
+                (make-instance 'reply-post
+                               :predecessor post
+                               :user *user*
+                               :render-style :markdown
+                               :text (remove-carriage-return (getf *body* :text))))))
+        (http-redirect (path-to new-post))))
     (http-err 404 "Not Found")))
 
 (defroute-auth :get "/file/:blob-id/:filename"
