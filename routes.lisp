@@ -141,3 +141,22 @@
           (setf (pw-hash *user*)
                 (pw-digest (getf *body* :new-password))))
         (http-redirect "/user/profile"))))
+
+(defroute-auth :get "/post/edit/:post-id"
+  (if-let (post (db:store-object-with-id (parse-integer post-id)))
+    (if (eql (post-user post) *user*)
+        (http-ok "text/html" (page/edit-post post))
+        (http-err 401 "Unauthorized"))
+    (http-err 404 "Not Found")))
+
+(defroute-auth :post "/post/edit/:post-id"
+  (if-let (post (db:store-object-with-id (parse-integer post-id)))
+    (if (eql (post-user post) *user*)
+        (progn
+          (db:with-transaction ()
+            (destructuring-bind (title text) (multipart-field-values "title" "text")
+              (setf (post-title post) title
+                    (post-text post) (remove-carriage-return text))))
+          (http-redirect (path-to post)))
+        (http-err 501 "Unauthorized"))
+    (http-err 404 "Not Found")))

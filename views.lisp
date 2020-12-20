@@ -49,12 +49,12 @@
 
      (body
       :background-color #(medium-dark)
-      :color #(light)
+      :color #(medium-light)
       :padding 0
       :font-size 16px)
 
      ((:or a p div h1 h2 h3 h4 pre input textarea ul)
-      :line-height 1.4
+      :line-height 1.6
       :margin #(margin)
       )
      
@@ -89,6 +89,8 @@
       :border-radius 4px)
      
      (pre
+      :padding 10px
+      :border-radius 5px
       :background-color #(darkest)
       :color #(secondary-color))
 
@@ -178,7 +180,7 @@
       :background-color #(dark)
       :border-radius 5px
       :padding 10px
-      :padding-left 4px)
+      )
 
      (.timeline-list
       :margin-left #(unmargin)
@@ -261,6 +263,28 @@
        (ps:chain document
                  (get-element-by-id "attachment-button")
                  (add-event-listener "click" #'add-attachment))))))
+
+(defpage edit-post (post) ()
+  (with-slots (db::id title text) post 
+    (view/nav)
+    (:div
+     :class "edit-post"
+     (:form
+      :method "POST"
+      :action (format nil "/post/edit/~a" db::id) 
+      :enctype "multipart/form-data"
+      (:input :name "title" :placeholder "Post Title" :value title) (:br)
+      (:textarea
+       :name "text" :rows "22" :cols "80" :wrap "soft"
+       text)
+      (:br)
+      ;(:span :class "button" :id "attachment-button" "Attach File")
+      ;(:div :id "attachment-section")
+      (:button :class "button" :type "submit" "Update Post"))))
+
+  )
+
+
 
 (defpage-with-timeline topic (topic) (:title (format nil "Compost - ~a"
                                                      (topic-name topic)))
@@ -368,8 +392,6 @@
                   (topic-name (post-topic post)))
             (list (path-to post)
                   (post-title post)))
-  
-
   (:div
    :class "postbody"
    (render-post post)
@@ -380,7 +402,12 @@
                       (user-timezone *user*)))
    " -- "
    (:span :class "username"
-          (user-name (post-user post))))
+          (user-name (post-user post)))
+   (when (eql (post-user post) *user*)
+     (:a :class "button"
+         :href (format nil "/post/edit/~a" (db:store-object-id post))
+         "Edit"))
+   )
   (view/reply-form post)
   (:h4 "comments")
   (dolist (reply (sorted-replies-to post))
