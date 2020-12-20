@@ -473,10 +473,15 @@
             (typecase post
               (reply-post
                (let ((root (find-root-post post))) 
-                 (:span "replying to .." (post-title root) " in " (topic-name (post-topic root)))))
+                 (:span "replying to "
+                        (post-title root)
+                        " in "
+                        (topic-name (post-topic root)))))
               (title-post
-               (:span "created " (post-title post) " in " (topic-name (post-topic post))))))
-
+               (:span "created "
+                      (post-title post)
+                      " in "
+                      (topic-name (post-topic post))))))
         (:br)
         (:span :class "time"
                (short-timestring (post-created post) (user-timezone *user*)))
