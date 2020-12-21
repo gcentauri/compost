@@ -6,7 +6,7 @@
 (defvar *user* nil
   "The authenticated user for this request.")
 
-;;; HTTP Utilities 
+;;; Route Handling Utilities 
 
 (defun get-header (header)
   (gethash header (getf *req* :headers)))
@@ -24,6 +24,12 @@
   (when-let (session-cookie (get-cookie +session-cookie-key+))
     (when-let (session (session-by-cookie session-cookie))
       (session-user session))))
+
+(defun parse-tags (string)
+  (loop :for tagname :in (split-string "," string)
+        :for clean-name = (string-trim '(#\Space #\Tab #\Newline #\Return) tagname)
+        :when (plusp (length clean-name))
+          :collect (make-keyword clean-name)))
 
 
 ;;; Routes
@@ -80,18 +86,21 @@
     (let ((post 
             (db:with-transaction ()
               (let ((post 
-                      (destructuring-bind (title text) (multipart-field-values "title" "text")
+                      (destructuring-bind (title text tags)
+                          (multipart-field-values "title" "text" "tags")
                         (make-instance 'title-post
                                        :title title
                                        :user *user*
                                        :render-style :markdown
                                        :topic topic
-                                       :text (remove-carriage-return text)))))
+                                       :text (remove-carriage-return text)
+                                       :tags (parse-tags tags)))))
                 (dolist (file (multipart-files))
                   (db:make-blob-from-file (getf file :body) 'attachment
                                           :filename (getf file :filename)
                                           :post post
                                           :type (getf file :content-type)))
+                (dolist (tag (post-tags post)) (tag-post post tag))
                 post))))
       (http-redirect (path-to post)))
     (http-err 404 "Topic not found")))
@@ -155,9 +164,15 @@
     (if (eql (post-user post) *user*)
         (progn
           (db:with-transaction ()
-            (destructuring-bind (title text) (multipart-field-values "title" "text")
+            (destructuring-bind (title text tags) (multipart-field-values "title" "text" "tags")
               (setf (post-title post) title
-                    (post-text post) (remove-carriage-return text))))
+                    (post-text post) (remove-carriage-return text)
+                    (post-tags post) (parse-tags tags))
+              (dolist (tag (post-tags post)) (tag-post post tag))))
           (http-redirect (path-to post)))
         (http-err 501 "Unauthorized"))
     (http-err 404 "Not Found")))
+
+
+(defroute-auth :get "/post/tag-browse"
+  (http-ok "text/html" (page/tag-browse)))

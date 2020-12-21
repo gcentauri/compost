@@ -7,6 +7,9 @@
 (defparameter +data-store-directory-name+
   "compost-store")
 
+(defvar *tag-index* NIL
+  "A hashtable that indexes lists of posts by keyword tags.")
+
 (defun data-store-path ()
   (make-pathname
    :directory (append (pathname-directory (user-homedir-pathname))
@@ -49,7 +52,6 @@
     :initform "US/Central"))
   (:metaclass db:persistent-class ))
 
-
 (defclass session (db:store-object)
   ((user
     :reader session-user
@@ -78,7 +80,8 @@
     :initarg :user
     :initform (error "Posts must have a user")
     :index-type bknr.indices:hash-index
-    :index-reader posts-by-user))
+    :index-reader posts-by-user)
+   )
   (:metaclass db:persistent-class))
 
 (defclass attachment (db:blob)
@@ -110,7 +113,12 @@
     :initarg :status
     :initform :posted
     :index-type bknr.indices:hash-index
-    :index-reader posts-by-status))
+    :index-reader posts-by-status)
+   (tags
+    :accessor post-tags
+    :initarg :tags
+    :initform (list)
+    :documentation "A List of keywords used to tag this post")   )
   (:metaclass db:persistent-class))
 
 (defclass reply-post (post)
@@ -196,3 +204,30 @@
                 #'>
                 :key 'post-created)))
     (subseq posts  0 (min count (length posts)))))
+
+
+(defun tag-post (post tag)
+  (assert (keywordp tag))
+  (setf (gethash tag *tag-index*)
+        (pushnew post (gethash tag *tag-index*))))
+
+(defun untag-post (post tag)
+  (assert (keywordp tag))
+  (setf (gethash tag *tag-index*)
+        (remove post (gethash tag *tag-index*))))
+
+(defun initialize-tag-index ()
+  "Initializes the tag index. Call again to reinitialize."
+  (setf *tag-index* (make-hash-table :synchronized t))
+  (dolist (post (db:store-objects-with-class 'title-post))
+    (dolist (tag (post-tags post))
+      (tag-post post tag))))
+
+(defun posts-by-tag (tag1 &rest moretags)
+  "Return a list of posts tagged with all supplied tags.  Tags are keywords."
+  (when-let (tagged (gethash tag1 *tag-index*))
+    (dolist (tag moretags tagged)
+      (setf tagged
+            (intersection tagged
+                          (gethash tag *tag-index*))))))
+

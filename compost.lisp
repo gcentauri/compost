@@ -21,8 +21,12 @@
   (unless (boundp 'db:*store*)
     (initialize-datastore))
 
+
+
   (when (zerop (length (all-users)))
     (load-initial-users))
+
+  (initialize-tag-index)
 
   (lzb:start :port port))
 

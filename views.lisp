@@ -65,6 +65,13 @@
      ((:and a :hover)
       :color #(tertiary-color))
 
+
+     (.post-taglist
+      :list-style-type none)
+
+     (.tag
+      :color #(primary-color))
+
      (.button
       :margin-left #(margin)
       :margin-right #(margin)
@@ -241,6 +248,7 @@
     :enctype "multipart/form-data"
     (:input :name "title" :placeholder "Post Title") (:br)
     (:textarea :name "text" :rows "22" :cols "80" :wrap "soft")  (:br)
+    (:input :name "tags" :placeholder "Tag One, Tag2, ....") (:br)
     (:span :class "button" :id "attachment-button" "Attach File")
     (:div :id "attachment-section")
     (:button :class "button" :type "submit" "Submit Post")))
@@ -265,7 +273,7 @@
                  (add-event-listener "click" #'add-attachment))))))
 
 (defpage edit-post (post) ()
-  (with-slots (db::id title text) post 
+  (with-slots (db::id title text tags) post 
     (view/nav)
     (:div
      :class "edit-post"
@@ -278,6 +286,8 @@
        :name "text" :rows "22" :cols "80" :wrap "soft"
        text)
       (:br)
+      (:input :name "tags" :placeholder "Tag One, Tag2, ...."
+              :value (join-strings ", " (mapcar 'symbol-name tags))) (:br)
       ;(:span :class "button" :id "attachment-button" "Attach File")
       ;(:div :id "attachment-section")
       (:button :class "button" :type "submit" "Update Post"))))
@@ -302,7 +312,15 @@
   (with-slots (title created user) post
     (:li 
      (:h4  (:a :href (path-to post) title))
-     (:br)
+     (when (post-tags post)
+       (:div
+        :class "post-taglist"
+        (:span "tags:")
+        (dolist (tag (mapcar 'symbol-name (post-tags post)))
+          (:a
+           :class "tag"
+           :href (format nil "/post/tag-browse?tags=~a" (urlencode:urlencode tag))
+           (string-downcase tag)))))     
      (:p 
       (:span :class "time"
              (timestring (post-created post)
@@ -396,6 +414,16 @@
    :class "postbody"
    (render-post post)
    (view/attachments post))
+  (when (post-tags post)
+    (:div
+     :class "post-taglist"
+     (:span "tags: ")
+     (dolist (tag (mapcar 'symbol-name (post-tags post)))
+       (:a
+        :class "tag"
+        :href (format nil "/post/tag-browse?tags=~a" (urlencode:urlencode tag))
+        (string-downcase tag)))))
+
   (:div
    (:span :class "time"
           (timestring (post-created post)
@@ -403,15 +431,38 @@
    " -- "
    (:span :class "username"
           (user-name (post-user post)))
+
+   
+
    (when (eql (post-user post) *user*)
      (:a :class "button"
          :href (format nil "/post/edit/~a" (db:store-object-id post))
          "Edit"))
+   
    )
   (view/reply-form post)
   (:h4 "comments")
   (dolist (reply (sorted-replies-to post))
     (view/comment reply)))
+
+(defun query->plist (qstring)
+  (when qstring
+    (loop :for kv :in (split-sequence:split-sequence #\& (urlencode:urldecode qstring))
+          :appending (destructuring-bind (k v) (split-sequence:split-sequence #\= kv)
+                       (list (make-keyword k) v)))))
+
+(defun query-plist ()
+  (query->plist (getf *req* :query-string)))
+
+
+(defpage-with-timeline tag-browse ()  (:title "Compost - Tag Browse ")
+  (let* ((tag-string (getf (query-plist) :tags))
+         (tags (parse-tags tag-string)))
+    (view/nav)
+    (:p "Posts tagged with: ")
+    (:ul :class "post-listing"
+        (dolist (post (apply 'posts-by-tag tags))
+          (view/title-post post)))))
 
 (defview reply-form (post)
   (let* ((post-id (db:store-object-id post))

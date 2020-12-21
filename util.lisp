@@ -65,3 +65,7 @@
 (defun remove-carriage-return (string)
   "removes #\Return from strings"
   (remove #\return string ))
+
+(defun make-keyword (string)
+  (intern (string-upcase string)
+          (find-package 'keyword)))
