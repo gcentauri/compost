@@ -459,7 +459,7 @@
   (let* ((tag-string (getf (query-plist) :tags))
          (tags (parse-tags tag-string)))
     (view/nav)
-    (:p "Posts tagged with: ")
+    (:p "Posts tagged with: " tag-string)
     (:ul :class "post-listing"
         (dolist (post (apply 'posts-by-tag tags))
           (view/title-post post)))))
