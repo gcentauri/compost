@@ -101,6 +101,9 @@
       :background-color #(darkest)
       :color #(secondary-color))
 
+     (blockquote
+      :border-left 5px solid #(medium))
+
       (.time
        :color #(medium-light))
 
@@ -119,7 +122,7 @@
       
      (.comment
       :border 1px solid #(medium)
-      :border-radius 5px
+      :border-radius 3px
       :color #(light)
 
       
@@ -184,8 +187,9 @@
        ))
 
      (.postbody
-      :background-color #(dark)
-      :border-radius 5px
+      :background-color #(light )
+      :color #(darkest)
+      :border-radius 2px
       :padding 10px
       )
 
@@ -389,7 +393,7 @@
   (let ((url (path-to attachment)))
     (cond
       ((image-blob-p attachment)
-       (:img :src url))
+       (:a :href url (:img :src url)))
       ((video-blob-p attachment)
        (:video
         :controls "true"
