@@ -43,7 +43,7 @@
            (medium-dark "#324150")
            (medium "#4D637A")
            (medium-light "#CCC")
-           (light "#EEE")
+           (light "#DEDEDE")
            (margin 10px)
            (unmargin -10px))
 
@@ -189,8 +189,12 @@
      (.postbody
       :background-color #(light )
       :color #(darkest)
-      :border-radius 2px
+      :border-radius 3px
       :padding 10px
+
+      ((:or h1 h2 h3 h4)
+       :margin-top 1.2em
+       :color #(dark))
       )
 
      (.timeline-list
