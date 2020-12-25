@@ -523,7 +523,7 @@
 (defview timeline ()
   (:div
    :class "timeline-panel"
-   (:h2 "Timeline")
+   (:h2 "Recent Activity")
    (:ul
     :class "timeline-list"
     (dolist (post (most-recent-posts))
