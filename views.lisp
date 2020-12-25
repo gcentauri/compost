@@ -95,11 +95,18 @@
       :padding 4px
       :border-radius 4px)
      
+     (code
+      :color #(tertiary-color))
+
      (pre
-      :padding 10px
+      :margin-top 1.2em
+      :padding 1.2em
       :border-radius 5px
       :background-color #(darkest)
-      :color #(secondary-color))
+      (code 
+       :color #(secondary-color)))
+
+
 
      (blockquote
       :border-left 5px solid #(medium))
