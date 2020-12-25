@@ -55,8 +55,7 @@
 
      ((:or a p div h1 h2 h3 h4 pre input textarea ul)
       :line-height 1.6
-      :margin #(margin)
-      )
+      :margin #(margin))
      
      (a
       :text-decoration none
@@ -64,7 +63,6 @@
 
      ((:and a :hover)
       :color #(tertiary-color))
-
 
      (.post-taglist
       :list-style-type none)
@@ -106,8 +104,6 @@
       (code 
        :color #(secondary-color)))
 
-
-
      (blockquote
       :border-left 5px solid #(medium))
 
@@ -121,7 +117,7 @@
        :padding 5px
 
        (span
-       (a :display inline) ))
+       (a :display inline)))
       
       (.right
        :float right)
@@ -131,7 +127,6 @@
       :border 1px solid #(medium)
       :border-radius 3px
       :color #(light)
-
       
       (h1
        :font-size 1.3em)
@@ -149,7 +144,6 @@
       :visibility hidden
       :height 0
       :widht 0)
-
 
      (.attachment
       :padding 2px
@@ -190,8 +184,7 @@
        (h4
         :margin 0
         :margin-left #(unmargin)
-        :padding 0)
-       ))
+        :padding 0)))
 
      (.postbody
       :background-color #(light )
@@ -201,8 +194,7 @@
 
       ((:or h1 h2 h3 h4)
        :margin-top 1.2em
-       :color #(dark))
-      )
+       :color #(dark)))
 
      (.timeline-list
       :margin-left #(unmargin)
@@ -215,21 +207,15 @@
        :border-top 1px solid #(medium))
 
       (a
-       :margin-left #(unmargin))
-      )
+       :margin-left #(unmargin)))
 
      (.timeline-page-container
       :width 100%
       :display grid
       :grid-template-columns 1fr 5fr 2fr 1fr
 
-      (.main-content-panel
-
-       )
-
       (.timeline-panel
-       :background-color #(dark)))
-     )))
+       :background-color #(dark))))))
 
 
 (defpage login () (:title "Compost - Login")
@@ -248,8 +234,7 @@
    :class "nav"
    (:a :href "/" "Frontpage")
    (loop :for (path text) :in breadcrumbs
-         :do (:span "→" (:a :href path text)))
-   ))
+         :do (:span "→" (:a :href path text)))))
 
 (defpage new-post (topic) ()
   (view/nav)
@@ -305,9 +290,7 @@
               :value (join-strings ", " (mapcar 'symbol-name tags))) (:br)
       ;(:span :class "button" :id "attachment-button" "Attach File")
       ;(:div :id "attachment-section")
-      (:button :class "button" :type "submit" "Update Post"))))
-
-  )
+      (:button :class "button" :type "submit" "Update Post")))))
 
 
 
@@ -452,9 +435,7 @@
    (when (eql (post-user post) *user*)
      (:a :class "button"
          :href (format nil "/post/edit/~a" (db:store-object-id post))
-         "Edit"))
-   
-   )
+         "Edit")))
   (view/reply-form post)
   (:h4 "comments")
   (dolist (reply (sorted-replies-to post))
@@ -525,8 +506,6 @@
    (dolist (reply (sorted-replies-to comment-post))
      (view/comment reply ))))
 
-
-
 (defview timeline ()
   (:div
    :class "timeline-panel"
@@ -555,8 +534,7 @@
         " --  "
         (:span :class "username"
                (user-name (post-user post))))
-       (:p ))))
-   ))
+       (:p ))))))
 
 (defpage profile () ()
     (with-slots (name ) *user*
@@ -578,8 +556,4 @@
                :name "new-password")
        (:input :placeholder "Repeat New Password" :type "password"
                :name "repeat-password")
-       (:button :type "submit" :class "button" "Change Password"))
-
-      
-
-      ))
+       (:button :type "submit" :class "button" "Change Password"))))
