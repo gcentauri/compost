@@ -556,4 +556,24 @@
                :name "new-password")
        (:input :placeholder "Repeat New Password" :type "password"
                :name "repeat-password")
-       (:button :type "submit" :class "button" "Change Password"))))
+       (:button :type "submit" :class "button" "Change Password")))
+
+  (:a :href "/user/make-invite"
+   "Click here to invite a friend."))
+
+(defpage invite (invite-key) ()
+  (view/nav)
+  (:h3 "Share this link with a friend to let them join up:")
+  (:p
+   (format nil "https://compost.hrlo.world/invite/redeem/~a"
+           invite-key)))
+
+(defpage make-account (key) ()
+  (:h3 "Create a new account")
+  (:form
+   :method "POST"
+   :action (format nil "/invite/redeem/~a" key)
+   (:input :name "username" :placeholder "Choose a Name")
+   (:input :name "password" :type "password" :placeholder "Password")
+   (:input :name "repeat-password" :type "password" :placeholder "Repeat Password")
+   (:button :type "submit" "Create Account")))

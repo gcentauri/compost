@@ -10,6 +10,9 @@
 (defvar *tag-index* NIL
   "A hashtable that indexes lists of posts by keyword tags.")
 
+(defvar *active-invites* NIL
+  "A hashtable that keeps active invites.")
+
 (defun data-store-path ()
   (make-pathname
    :directory (append (pathname-directory (user-homedir-pathname))
@@ -51,6 +54,7 @@
     :accessor user-timezone
     :initform "US/Central"))
   (:metaclass db:persistent-class ))
+
 
 (defclass session (db:store-object)
   ((user
@@ -231,3 +235,9 @@
             (intersection tagged
                           (gethash tag *tag-index*))))))
 
+
+(defun make-invite (user)
+  (declare (ignore user))
+  (let ((invite-key (make-uid "invitation")))
+    (setf (gethash invite-key *active-invites*) :unclaimed)
+    invite-key))

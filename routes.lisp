@@ -176,3 +176,26 @@
 
 (defroute-auth :get "/post/tag-browse"
   (http-ok "text/html" (page/tag-browse)))
+
+(defroute-auth :get "/user/make-invite"
+  (if-let (new-invite (make-invite *user*))
+    (http-ok "text/html" (page/invite new-invite))
+    (http-err 501 "Unauthorized")))
+
+(defroute :get "/invite/redeem/:key"
+  (if (eql (gethash key *active-invites*) :unclaimed)
+    (http-ok "text/html" (page/make-account key))
+    (http-err 404 "Invitation Expired or Not Found")))
+
+(defroute :post "/invite/redeem/:key"
+  (if (eql (gethash key *active-invites*) :unclaimed)
+      (if (equal (getf *body* :password)
+                 (getf *body* :repeat-password))
+          (progn
+            (db:with-transaction ()
+              (make-user (getf *body* :username)
+                         (getf *body* :password)))
+            (remhash key *active-invites*)
+            (http-redirect "/"))
+          (http-err 501 "Passwords did not match"))
+      (http-err 404 "Invitation Expired or Not Found")))
