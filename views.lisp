@@ -512,12 +512,13 @@
            (user-name (post-user comment-post)))
     " says:")
    (render-post comment-post)
-   (view/attachments comment-post)
 
    (view/reply-form comment-post)
 
    (dolist (reply (sorted-replies-to comment-post))
      (view/comment reply ))))
+
+
 
 (defview timeline ()
   (:div
