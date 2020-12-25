@@ -4,7 +4,7 @@
   :description "A message board for small groups"
   :author "Colin Okay <okay@toyful.space>"
   :license  "AGPL-3.0"
-  :version "0.0.1"
+  :version "0.1.0"
   :serial t
   :depends-on (#:bknr.datastore
                #:lazybones
@@ -15,7 +15,8 @@
                #:ironclad
                #:cl-base64
                #:jonathan
-               #:markdown.cl)
+               #:markdown.cl
+               #:swank)
   :components ((:file "package")
                (:file "util")
                (:file "model")

@@ -37,6 +37,7 @@
 
 (defun start-loop () 
   (let ((port (parse-integer (first (uiop:command-line-arguments)))))
+    (bt:make-thread (lambda () (swank:create-server :port 4006 :dont-close t)))
     (start :port port)
     (help-menu)
     (loop :for command = (read)
