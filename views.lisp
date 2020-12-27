@@ -94,7 +94,7 @@
       :border-radius 4px)
      
      (code
-      :color #(tertiary-color))
+      :color #(medium-light ))
 
      (pre
       :margin-top 1.2em
@@ -115,6 +115,7 @@
 
       (.nav
        :padding 5px
+       :margin-left #(unmargin)
 
        (span
        (a :display inline)))
@@ -127,6 +128,7 @@
       :border 1px solid #(medium)
       :border-radius 3px
       :color #(light)
+      :padding 1.5em
       
       (h1
        :font-size 1.3em)
@@ -187,14 +189,14 @@
         :padding 0)))
 
      (.postbody
-      :background-color #(light )
-      :color #(darkest)
-      :border-radius 3px
-      :padding 10px
+      :background-color #(medium-dark )
+      :margin-left #(unmargin)
+      :color #(light)
+
 
       ((:or h1 h2 h3 h4)
        :margin-top 1.2em
-       :color #(dark)))
+       :color #(primary-color )))
 
      (.timeline-list
       :margin-left #(unmargin)
@@ -405,11 +407,10 @@
 (defpage-with-timeline post (post) (:title (format nil "Compost - ~a"
                                      (post-title post)))
   (view/nav (list (path-to (post-topic post))
-                  (topic-name (post-topic post)))
-            (list (path-to post)
-                  (post-title post)))
+                  (topic-name (post-topic post))))
   (:div
    :class "postbody"
+   (:b (post-title post))
    (render-post post)
    (view/attachments post))
   (when (post-tags post)
