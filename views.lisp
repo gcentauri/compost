@@ -196,7 +196,7 @@
 
       ((:or h1 h2 h3 h4)
        :margin-top 1.2em
-       :color #(primary-color )))
+       :color #(secondary-color)))
 
      (.timeline-list
       :margin-left #(unmargin)
