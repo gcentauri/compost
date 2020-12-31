@@ -14,14 +14,12 @@
   (let ((config
           (with-open-file (input (config-file-path))
             (read input))))
-    (loop :for (username password) :in (getf config :players)
+    (loop :for (username password) :in (getf config :users)
           :do (make-user username password))))
 
 (defun start (&key (port 5000))
   (unless (boundp 'db:*store*)
     (initialize-datastore))
-
-
 
   (when (zerop (length (all-users)))
     (load-initial-users))
