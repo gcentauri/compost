@@ -1,19 +1,6 @@
 (in-package #:compost)
 
-(defmacro defpage  (name lambda-list
-                    (&key (stylesheets (list "/css/main.css")) scripts (title ""))
-                    &body body)
-  (let ((page-name (intern (format nil "PAGE/~a" name))))
-    `(defun ,page-name ,lambda-list
-       (with-html-string
-         (:doctype)
-         (:html
-          (:head
-           (:title ,title)
-           (dolist (css (list ,@stylesheets))
-             (:link :rel "stylesheet" :href css))
-           (:script
-            "/*
+(defparameter +librejs-blanket-license+ "/*
 @licstart The following is the entire license notice for the
 JavaScript code in this page.
 
@@ -32,8 +19,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 @licend The above is the entire license notice
 for the JavaScript code in this page.
-*/"
-            ))
+*/")
+
+(defmacro defpage  (name lambda-list
+                    (&key (stylesheets (list "/css/main.css")) scripts (title ""))
+                    &body body)
+  (let ((page-name (intern (format nil "PAGE/~a" name))))
+    `(defun ,page-name ,lambda-list
+       (with-html-string
+         (:doctype)
+         (:html
+          (:head
+           (:title ,title)
+           (dolist (css (list ,@stylesheets))
+             (:link :rel "stylesheet" :href css))
+           (:script +librejs-blanket-license+))
           (:body
            ,@body
            (dolist (js (list ,@scripts))
