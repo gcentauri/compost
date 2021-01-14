@@ -5,6 +5,8 @@
 (defparameter +config-file+
   "compost.conf")
 
+(defvar *root-url* nil)
+
 (defun config-file-path ()
   (merge-pathnames +config-file+ (user-homedir-pathname)))
 
@@ -25,6 +27,7 @@
     (load-initial-users))
 
   (initialize-tag-index)
+  (initialize-invite-tab)
 
   (lzb:start :port port))
 
@@ -34,7 +37,10 @@
   (force-output))
 
 (defun start-loop () 
-  (let ((port (parse-integer (first (uiop:command-line-arguments)))))
+  (let ((port (parse-integer (first (uiop:command-line-arguments))))
+        (root-url (second (uiop:command-line-arguments))))
+    (assert (https-url-p root-url))
+    (setf *root-url* root-url)
     (bt:make-thread (lambda () (swank:create-server :port 4006 :dont-close t)))
     (start :port port)
     (help-menu)

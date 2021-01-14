@@ -2,6 +2,9 @@
 
 (in-package #:compost)
 
+(defun https-url-p (str)
+  (string-equal "https://" str :end2 8))
+
 (defun pw-digest (str)
   (flexi-streams:octets-to-string 
    (ironclad:digest-sequence

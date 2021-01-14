@@ -588,8 +588,8 @@ for the JavaScript code in this page.
   (view/nav)
   (:h3 "Share this link with a friend to let them join up:")
   (:p
-   (format nil "https://compost.hrlo.world/invite/redeem/~a"
-           invite-key)))
+   (format nil "~a/invite/redeem/~a"
+           *root-url* invite-key)))
 
 (defpage make-account (key) ()
   (:h3 "Create a new account")

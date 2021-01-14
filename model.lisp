@@ -220,6 +220,10 @@
   (setf (gethash tag *tag-index*)
         (remove post (gethash tag *tag-index*))))
 
+(defun initialize-invite-tab ()
+  "Initialize invite table. Call again to reinitialize."
+  (setf *active-invites* (make-hash-table :synchronized t)))
+
 (defun initialize-tag-index ()
   "Initializes the tag index. Call again to reinitialize."
   (setf *tag-index* (make-hash-table :synchronized t))
