@@ -9,7 +9,13 @@ If you have sbcl installed you can just
 
     sbcl --load build.lisp 
     
-This will produce a `compost` binary.
+This will produce a `compost` binary, which you can run like:
+
+    compost 5005 https://foo.bar.com 
+    
+The first argument is the localhost port (assumes you're running
+behind a reverse proxy) and the second is the root host name, used for
+link generation. 
 
 The first time you run the compost, it will look for a file called
 `$HOME/compost.conf` that should contain usernames and passwords for
