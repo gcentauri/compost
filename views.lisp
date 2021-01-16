@@ -33,6 +33,7 @@ for the JavaScript code in this page.
            (:title ,title)
            (dolist (css (list ,@stylesheets))
              (:link :rel "stylesheet" :href css))
+           (:link :rel "stylesheet" :href "https://cdn.jsdelivr.net/npm/victormono@latest/dist/index.min.css")
            (:script +librejs-blanket-license+))
           (:body
            ,@body
@@ -73,12 +74,14 @@ for the JavaScript code in this page.
       :background-color #(medium-dark)
       :color #(medium-light)
       :padding 0
-      :font-size 16px)
+      :font-size 16px
+      :font-family "Victor Mono"
+      :font-style italic)
 
      ((:or a p div h1 h2 h3 h4 pre input textarea ul)
       :line-height 1.6
       :margin #(margin))
-     
+
      (a
       :text-decoration none
       :color #(secondary-color))
@@ -114,9 +117,11 @@ for the JavaScript code in this page.
       :color #(light)
       :padding 4px
       :border-radius 4px)
-     
+
      (code
-      :color #(medium-light ))
+      :color #(medium-light )
+      :font-family "Victor Mono"
+      :font-style normal)
 
      (pre
       :margin-top 1.2em
